@@ -10,6 +10,7 @@ void fd_node_poisson_solve_3d(
     double cell_sidelength_z = 1
 );
 
+// Not tested yet
 void fd_gauge_correct_3d(
     int ni, int nj, int nk,            // Cell count in each axis (NOT node count)
     double *psi_freqs_x,               // (ni, nj-1, nk-1)
@@ -64,9 +65,24 @@ extern const Symmetry nodes_3d_symmetries[3];
 extern const Symmetry cells_3d_symmetries[3];
 
 
+// Works on interior node values
+void to_frequencies_nodes_3d(
+    int ni, int nj, int nk,     // Cell count in each axis (NOT node count)
+    double *node,                // (ni-1, nj-1, nk-1)
+    double *node_out = nullptr   // (ni-1, nj-1, nk-1)
+);
+
+// Works on interior node values
+void from_frequencies_nodes_3d(
+    int ni, int nj, int nk,      // Cell count in each axis (NOT node count)
+    double *node,                // (ni-1, nj-1, nk-1)
+    double *node_out = nullptr   // (ni-1, nj-1, nk-1)
+);
+
+
 // Works on interior edge values
 void to_frequencies_edges_3d(
-    int ni, int nj, int nk,       // Cell count in each axis (NOT node count)
+    int ni, int nj, int nk,        // Cell count in each axis (NOT node count)
     double *edge_x,                // (ni, nj-1, nk-1)
     double *edge_y,                // (ni-1, nj, nk-1)
     double *edge_z,                // (ni-1, nj-1, nk)
@@ -77,7 +93,7 @@ void to_frequencies_edges_3d(
 
 // Works on interior edge values
 void from_frequencies_edges_3d(
-    int ni, int nj, int nk,       // Cell count in each axis (NOT node count)
+    int ni, int nj, int nk,        // Cell count in each axis (NOT node count)
     double *edge_x,                // (ni, nj-1, nk-1)
     double *edge_y,                // (ni-1, nj, nk-1)
     double *edge_z,                // (ni-1, nj-1, nk)
@@ -89,7 +105,7 @@ void from_frequencies_edges_3d(
 
 // Works on interior face values
 void to_frequencies_faces_3d(
-    int ni, int nj, int nk,     // Cell count in each axis (NOT node count)
+    int ni, int nj, int nk,        // Cell count in each axis (NOT node count)
     double *face_x,                // (ni-1, nj, nk)
     double *face_y,                // (ni, nj-1, nk)
     double *face_z,                // (ni, nj, nk-1)
@@ -100,28 +116,13 @@ void to_frequencies_faces_3d(
 
 // Works on interior face values
 void from_frequencies_faces_3d(
-    int ni, int nj, int nk,     // Cell count in each axis (NOT node count)
+    int ni, int nj, int nk,        // Cell count in each axis (NOT node count)
     double *face_x,                // (ni-1, nj, nk)
     double *face_y,                // (ni, nj-1, nk)
     double *face_z,                // (ni, nj, nk-1)
     double *face_x_out = nullptr,  // (ni-1, nj, nk)
     double *face_y_out = nullptr,  // (ni, nj-1, nk)
     double *face_z_out = nullptr   // (ni, nj, nk-1)
-);
-
-
-// Works on interior node values
-void to_frequencies_nodes_3d(
-    int ni, int nj, int nk,     // Cell count in each axis (NOT node count)
-    double *node,                // (ni-1, nj-1, nk-1)
-    double *node_out = nullptr   // (ni-1, nj-1, nk-1)
-);
-
-// Works on interior node values
-void from_frequencies_nodes_3d(
-    int ni, int nj, int nk,     // Cell count in each axis (NOT node count)
-    double *node,                // (ni-1, nj-1, nk-1)
-    double *node_out = nullptr   // (ni-1, nj-1, nk-1)
 );
 
 

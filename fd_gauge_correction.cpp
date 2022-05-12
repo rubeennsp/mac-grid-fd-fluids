@@ -277,6 +277,7 @@ void fd_node_poisson_solve_3d(
 }
 
 
+// Not tested yet
 void fd_gauge_correct_3d(
     int ni, int nj, int nk,            // Cell count in each axis (NOT node count)
     double *psi_freqs_x,               // (ni, nj-1, nk-1)
