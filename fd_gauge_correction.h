@@ -45,9 +45,24 @@ void from_frequencies_3d(
     double *data, double *out
 );
 
+
+
 //#############################################################################
 // 3d grid frequency domain transforms and inverses specific to certain fluid data.
 //#############################################################################
+
+extern const Symmetry edges_3d_symmetries_x[3];
+extern const Symmetry edges_3d_symmetries_y[3];
+extern const Symmetry edges_3d_symmetries_z[3];
+
+extern const Symmetry faces_3d_symmetries_x[3];
+extern const Symmetry faces_3d_symmetries_y[3];
+extern const Symmetry faces_3d_symmetries_z[3];
+
+extern const Symmetry nodes_3d_symmetries[3];
+
+extern const Symmetry cells_3d_symmetries[3];
+
 
 // Works on interior edge values
 void to_frequencies_edges_3d(
@@ -71,6 +86,7 @@ void from_frequencies_edges_3d(
     double *edge_z_out = nullptr   // (ni-1, nj-1, nk)
 );
 
+
 // Works on interior face values
 void to_frequencies_faces_3d(
     int ni, int nj, int nk,     // Cell count in each axis (NOT node count)
@@ -93,6 +109,7 @@ void from_frequencies_faces_3d(
     double *face_z_out = nullptr   // (ni, nj, nk-1)
 );
 
+
 // Works on interior node values
 void to_frequencies_nodes_3d(
     int ni, int nj, int nk,     // Cell count in each axis (NOT node count)
@@ -107,18 +124,19 @@ void from_frequencies_nodes_3d(
     double *node_out = nullptr   // (ni-1, nj-1, nk-1)
 );
 
+
 // Works on interior cell values
 void to_frequencies_cells_3d(
     int ni, int nj, int nk,     // Cell count in each axis (NOT node count)
     double *cell,               // (ni, nj, nk)
-    double *cell_out = nullptr  // (ni, nj, nk)
+    double *cell_out            // (ni, nj, nk)
 );
 
 // Works on interior cell values
 void from_frequencies_cells_3d(
     int ni, int nj, int nk,     // Cell count in each axis (NOT node count)
-    double *cell,                // (ni, nj, nk)
-    double *cell_out = nullptr   // (ni, nj, nk)
+    double *cell,               // (ni, nj, nk)
+    double *cell_out            // (ni, nj, nk)
 );
 
 #endif

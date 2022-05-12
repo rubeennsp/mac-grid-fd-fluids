@@ -9,18 +9,6 @@
 // Helpers to deal with odd vs. even signal differences
 //#############################################################################
 
-static const Symmetry edges_3d_symmetries_x[3] = { Symmetry::Even, Symmetry::Odd, Symmetry::Odd, };
-static const Symmetry edges_3d_symmetries_y[3] = { Symmetry::Odd, Symmetry::Even, Symmetry::Odd, };
-static const Symmetry edges_3d_symmetries_z[3] = { Symmetry::Odd, Symmetry::Odd, Symmetry::Even, };
-
-static const Symmetry faces_3d_symmetries_x[3] = { Symmetry::Odd, Symmetry::Even, Symmetry::Even, };
-static const Symmetry faces_3d_symmetries_y[3] = { Symmetry::Even, Symmetry::Odd, Symmetry::Even, };
-static const Symmetry faces_3d_symmetries_z[3] = { Symmetry::Even, Symmetry::Even, Symmetry::Odd, };
-
-static const Symmetry nodes_3d_symmetries[3] = { Symmetry::Odd, Symmetry::Odd, Symmetry::Odd };
-
-static const Symmetry cells_3d_symmetries[3] = { Symmetry::Even, Symmetry::Even, Symmetry::Even, };
-
 
 inline int array_size_for_fftw(int num_cells, Symmetry symmetry) {
     // The number of cells along an axis is used as the half-period for the DCT/DST.
@@ -214,7 +202,7 @@ inline int grid_index_3d(int ix, int iy, int iz, int lenx, int leny, int lenz) {
         ix >= 0 || iy >= 0 || iz >= 0
         || ix < lenx || iy < leny || iz < lenz
     )
-        return ix * leny * lenz + iy * lenz + iz;
+        return (ix * leny * lenz) + (iy * lenz) + iz;
 
     return INVALID_IDX;
 }
@@ -368,11 +356,23 @@ void fd_gauge_correct_3d(
 
 
 //#############################################################################
-// 3d grid frequency domain transforms and inverses specific to certain fluid data.
+// 3d grid frequency domain transforms and inverses specific to certain elements of the staggered grid.
 // 
 // Maybe we don't need every single one of these but they're a good reference
 // to help understand what's going on with the odd/even symmetries anyways.
 //#############################################################################
+
+const Symmetry edges_3d_symmetries_x[3] = { Symmetry::Even, Symmetry::Odd, Symmetry::Odd, };
+const Symmetry edges_3d_symmetries_y[3] = { Symmetry::Odd, Symmetry::Even, Symmetry::Odd, };
+const Symmetry edges_3d_symmetries_z[3] = { Symmetry::Odd, Symmetry::Odd, Symmetry::Even, };
+
+const Symmetry faces_3d_symmetries_x[3] = { Symmetry::Odd, Symmetry::Even, Symmetry::Even, };
+const Symmetry faces_3d_symmetries_y[3] = { Symmetry::Even, Symmetry::Odd, Symmetry::Even, };
+const Symmetry faces_3d_symmetries_z[3] = { Symmetry::Even, Symmetry::Even, Symmetry::Odd, };
+
+const Symmetry nodes_3d_symmetries[3] = { Symmetry::Odd, Symmetry::Odd, Symmetry::Odd };
+
+const Symmetry cells_3d_symmetries[3] = { Symmetry::Even, Symmetry::Even, Symmetry::Even, };
 
 
 // Works on interior edge values
@@ -444,7 +444,7 @@ void from_frequencies_faces_3d(
 
 
 // Works on interior node values
-void to_frequencies_node_3d(
+void to_frequencies_nodes_3d(
     int ni, int nj, int nk,     // Cell count in each axis (NOT node count)
     double *node,               // (ni-1, nj-1, nk-1)
     double *node_out            // (ni-1, nj-1, nk-1)
@@ -455,7 +455,7 @@ void to_frequencies_node_3d(
 
 
 // Works on interior node values
-void from_frequencies_node_3d(
+void from_frequencies_nodes_3d(
     int ni, int nj, int nk,     // Cell count in each axis (NOT node count)
     double *node,                // (ni-1, nj-1, nk-1)
     double *node_out             // (ni-1, nj-1, nk-1)
