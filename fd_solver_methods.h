@@ -1,5 +1,5 @@
-#ifndef FD_GAUGE_CORRECTION_H
-#define FD_GAUGE_CORRECTION_H
+#ifndef FD_SOLVER_METHODS_H
+#define FD_SOLVER_METHODS_H
 
 // NOTE: The solves and transforms here can be performed in place by
 //       supplying nullptr (or the input location) as the output location.

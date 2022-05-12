@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <cmath>
 #include <vector>
-#include "fd_gauge_correction.h"
+#include "fd_solver_methods.h"
 
 
 //#############################################################################
