@@ -69,7 +69,7 @@ void test1() {
 }
 
 void test2() {
-    print_title("Test 2: Poisson solve");
+    print_title("Test 2: Frequency-domain poisson solve");
 
     // In a (4, 6, 8) fluid grid, the interior nodes are a (3, 5, 7) grid.
     double target_laplacian[3][5][7] =
@@ -98,9 +98,9 @@ void test2() {
     };
 
 
-    double sidelengths[3] = { 1, 2, 4 };
+    double sidelengths[3] = { 1, 2, 4 }; // Can try other sidelengths
 
-    std::cout << "Target laplacian" << std::endl;
+    std::cout << "Target laplacian (at interior nodes. Boundary nodes are assumed to be 0)" << std::endl;
     print_grid_3d(3, 5, 7, &target_laplacian[0][0][0]);
     std::cout << std::endl;
 

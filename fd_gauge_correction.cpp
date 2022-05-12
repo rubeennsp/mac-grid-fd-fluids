@@ -208,10 +208,6 @@ inline int grid_index_3d(int ix, int iy, int iz, int lenx, int leny, int lenz) {
 }
 
 
-// TODO: Should we use sidelength multipliers at all?
-// - Might the cells have different sidelengths in the three axes?
-// - Might the actual correct values matter?
-
 // TODO: Explain what these diff multipliers are
 std::vector<double> fd_finite_differencing_multipliers_s2c(int n, double length_between_samples = 1) {
     std::vector<double> v;
@@ -258,7 +254,7 @@ void fd_node_poisson_solve_3d(
                 int node_idx = get_idx(i, j, k);
                 assert(node_idx != INVALID_IDX); // True because the for loop ranges are correct. Assert anyways.
 
-                // TODO: Explain what these diff vector is, lol
+                // TODO: Explain what these diff vectors are
                 vec3 diff_s2c_ijk {
                     diff_s2c_x[i],
                     diff_s2c_y[j],
@@ -266,18 +262,20 @@ void fd_node_poisson_solve_3d(
                 };
                 vec3 diff_c2s_ijk = -diff_s2c_ijk;
 
-                double div_multiplier = dot(diff_c2s_ijk, diff_s2c_ijk);
-
-                double node_freq_answer = lap_freqs[node_idx] / div_multiplier;
-
-                node_freqs_out[node_idx] = node_freq_answer;
+                // In the DST domain, taking the laplacian of f is just dot(diff, diff) * f
+                // although we just need to mind which diff multipliers are used. (Sine-to-cosine or the other way around.)
+                // If g is the laplacian of f, then f = g / dot(diff, diff)
+                node_freqs_out[node_idx] = lap_freqs[node_idx] / dot(diff_c2s_ijk, diff_s2c_ijk);
+                                                               // equiv = -mag2(diff)
             }
         }
     }
 }
 
 
-// Not tested yet
+// Not tested yet. Probably better to not use this because
+// it requires more data to have gone through frequency transforms
+// (three grids instead of just the one needed by fd_node_poisson_solve_3d)
 void fd_gauge_correct_3d(
     int ni, int nj, int nk,            // Cell count in each axis (NOT node count)
     double *psi_freqs_x,               // (ni, nj-1, nk-1)
@@ -326,7 +324,6 @@ void fd_gauge_correct_3d(
                     psi_z_idx_ijk == INVALID_IDX ? 0 : psi_freqs_z[psi_z_idx_ijk],
                 };
 
-                // TODO: Explain what these diff vector is, lol
                 vec3 diff_s2c_ijk {
                     diff_s2c_x[i],
                     diff_s2c_y[j],
@@ -334,10 +331,15 @@ void fd_gauge_correct_3d(
                 };
                 vec3 diff_c2s_ijk = - diff_s2c_ijk;
 
-                double phi_ijk = - dot(diff_c2s_ijk, psi_ijk) / dot(diff_c2s_ijk, diff_s2c_ijk);
+                // Laplacian of phi = phi * dot(diff_s2c, diff_c2s) or equivalently phi * (-mag(diff))
+                // Divergence of psi = dot(diff, psi)
+                // Equating the two lines above gives the following solution for phi
+                double phi_ijk = dot(diff_c2s_ijk, psi_ijk) / dot(diff_c2s_ijk, diff_s2c_ijk);
 
+                // In the frequency domain, the gradient of phi is just phi * diff. (scalar * vector)
                 vec3 grad_phi_ijk = phi_ijk * diff_s2c_ijk;
 
+                // Divergence-free psi
                 vec3 corrected_psi_ijk = psi_ijk - grad_phi_ijk;
 
                 // Write out to psi

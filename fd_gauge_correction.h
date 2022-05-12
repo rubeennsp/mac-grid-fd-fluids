@@ -1,16 +1,26 @@
 #ifndef FD_GAUGE_CORRECTION_H
 #define FD_GAUGE_CORRECTION_H
 
+// NOTE: The solves and transforms here can be performed in place by
+//       supplying nullptr (or the input location) as the output location.
+
+//#############################################################################
+// Solvers in frequency domain
+//#############################################################################
+
+// Works on interior node values
 void fd_node_poisson_solve_3d(
     int ni, int nj, int nk,       // Cell count in each axis (NOT node count)
-    double *lap,                  // Laplacian frequencies (ni-1, nj-1, nk-1)
+    double *lap_freqs,            // Laplacian frequencies (ni-1, nj-1, nk-1)
     double *node_freqs_out,       // (ni-1, nj-1, nk-1)
     double cell_sidelength_x = 1,
     double cell_sidelength_y = 1,
     double cell_sidelength_z = 1
 );
 
-// Not tested yet
+// Not tested yet. Probably better to not use this because
+// it requires more data to have gone through frequency transforms
+// (three grids instead of just the one needed by fd_node_poisson_solve_3d)
 void fd_gauge_correct_3d(
     int ni, int nj, int nk,            // Cell count in each axis (NOT node count)
     double *psi_freqs_x,               // (ni, nj-1, nk-1)
@@ -49,7 +59,7 @@ void from_frequencies_3d(
 
 
 //#############################################################################
-// 3d grid frequency domain transforms and inverses specific to certain fluid data.
+// 3d grid frequency domain transforms and inverses specific to certain elements of the staggered grid.
 //#############################################################################
 
 extern const Symmetry edges_3d_symmetries_x[3];
