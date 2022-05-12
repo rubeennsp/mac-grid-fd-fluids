@@ -1,6 +1,7 @@
 #include "fd_gauge_correction.h"
 #include <iostream>
 #include <string>
+#include <chrono>
 
 void print_title(std::string title) {
     std::cout
@@ -150,10 +151,69 @@ void test2() {
         << "This laplacian was calculated uses sidelengths "
             << sidelengths[0] << ", " << sidelengths[1] << ", and " << sidelengths[2] << " "
             << "for the x, y, and z axes respectively." << std::endl
-        << "Please refer to the test code to verify that the laplacian is calculated as expected." << std::endl;
+        << "Please refer to the test code to verify that the laplacian is calculated as expected." << std::endl
+        << std::endl
+        << std::endl;
+}
+
+void test3() {
+    print_title("Test 3: Basic benchmark for poisson solve");
+
+    int ni = 128, nj = 256, nk = 512;
+
+    double *target_laplacian = new double[(ni-1)*(nj-1)*(nk-1)];
+
+    double sidelengths[3] = { 1, 2, 4 };
+
+    int num_repetitions = 10;
+    int print_every = 1;
+
+    std::cout
+        << "Provided input:" << std::endl
+        << "  Target laplacian at interior nodes, already arranged in a compact array." << std::endl
+        << "    (Conceptual) Fluid grid size = (" << ni << ", " << nj << ", " << nk << ")" << std::endl
+        << "    Interior node grid size = (" << ni-1 << ", " << nj-1 << ", " << nk-1 << ")" << std::endl
+        << "Memory:" << std::endl
+        << "  Some pre-allocated grids for (intermediate and final) results." << std::endl
+        << "    See code to check where in-place operations happen." << std::endl
+        << "Task (to be repeated " << num_repetitions << " times):" << std::endl
+        << "  1. Transform target laplacian to frequencies." << std::endl
+        << "  2. Perform poisson solve in frequency domain." << std::endl
+        << "  3. Convert solve result back from frequency domain into spatial." << std::endl
+        << std::endl;
+
+    double *result = new double[(ni-1)*(nj-1)*(nk-1)];
+    // Can allocate more arrays and use them to see how non-in-place operations perform.
+    // double *result2 = new double[(ni-1)*(nj-1)*(nk-1)];
+    // double *result3 = new double[(ni-1)*(nj-1)*(nk-1)];
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    for (int i = 0; i < num_repetitions; i++) {
+        if (i % print_every == 0 && i > 0) std::cout << i << " repetitions done" << std::endl << std::flush;
+
+        to_frequencies_nodes_3d(ni, nj, nk, target_laplacian, result); // Write out to result array
+        fd_node_poisson_solve_3d(ni, nj, nk, result, result, sidelengths[0], sidelengths[1], sidelengths[2]); // in-place on the result array
+        from_frequencies_nodes_3d(ni, nj, nk, result, result); // in-place on the result array
+    }
+
+    auto end = std::chrono::high_resolution_clock::now();
+
+    std::cout << std::endl << "All " << num_repetitions << " repetitions done!" << std::endl;
+    std::chrono::duration<double, std::milli> float_ms = end - start;
+    auto int_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout
+        << "Total elapsed time: " << float_ms.count() / 1000 << " seconds." << std::endl
+        << "That is " << float_ms.count() / 1000 / double(num_repetitions) << " seconds per repetition." << std::endl
+        << std::endl
+        << std::endl;
+
+    delete[] target_laplacian;
+    delete[] result;
 }
 
 int main() {
     test1();
     test2();
+    test3();
 }
