@@ -44,14 +44,14 @@ void test1() {
     std::cout << std::endl;
 
     // Convert into frequencies in place
-    to_frequencies_phi_3d(4, 6, 8, &grid[0][0][0]);
+    to_frequencies_nodes_3d(4, 6, 8, &grid[0][0][0]);
 
     std::cout << "Frequencies" << std::endl;
     print_grid_3d(3, 5, 7, &grid[0][0][0]);
     std::cout << std::endl;
 
     // Convert back into original data in place
-    from_frequencies_phi_3d(4, 6, 8, &grid[0][0][0]);
+    from_frequencies_nodes_3d(4, 6, 8, &grid[0][0][0]);
 
     std::cout << "Reconstructed" << std::endl;
     print_grid_3d(3, 5, 7, &grid[0][0][0]);

@@ -9,15 +9,17 @@
 // Helpers to deal with odd vs. even signal differences
 //#############################################################################
 
-static const Symmetry streamfn_3d_symmetries_x[3] = { Symmetry::Even, Symmetry::Odd, Symmetry::Odd, };
-static const Symmetry streamfn_3d_symmetries_y[3] = { Symmetry::Odd, Symmetry::Even, Symmetry::Odd, };
-static const Symmetry streamfn_3d_symmetries_z[3] = { Symmetry::Odd, Symmetry::Odd, Symmetry::Even, };
+static const Symmetry edges_3d_symmetries_x[3] = { Symmetry::Even, Symmetry::Odd, Symmetry::Odd, };
+static const Symmetry edges_3d_symmetries_y[3] = { Symmetry::Odd, Symmetry::Even, Symmetry::Odd, };
+static const Symmetry edges_3d_symmetries_z[3] = { Symmetry::Odd, Symmetry::Odd, Symmetry::Even, };
 
-static const Symmetry velocity_3d_symmetries_x[3] = { Symmetry::Odd, Symmetry::Even, Symmetry::Even, };
-static const Symmetry velocity_3d_symmetries_y[3] = { Symmetry::Even, Symmetry::Odd, Symmetry::Even, };
-static const Symmetry velocity_3d_symmetries_z[3] = { Symmetry::Even, Symmetry::Even, Symmetry::Odd, };
+static const Symmetry faces_3d_symmetries_x[3] = { Symmetry::Odd, Symmetry::Even, Symmetry::Even, };
+static const Symmetry faces_3d_symmetries_y[3] = { Symmetry::Even, Symmetry::Odd, Symmetry::Even, };
+static const Symmetry faces_3d_symmetries_z[3] = { Symmetry::Even, Symmetry::Even, Symmetry::Odd, };
 
-static const Symmetry phinodes_3d_symmetries[3] = { Symmetry::Odd, Symmetry::Odd, Symmetry::Odd };
+static const Symmetry nodes_3d_symmetries[3] = { Symmetry::Odd, Symmetry::Odd, Symmetry::Odd };
+
+static const Symmetry cells_3d_symmetries[3] = { Symmetry::Even, Symmetry::Even, Symmetry::Even, };
 
 
 inline int array_size_for_fftw(int num_cells, Symmetry symmetry) {
@@ -241,9 +243,9 @@ void fd_node_poisson_solve_3d(
     int ni, int nj, int nk,       // Cell count in each axis (NOT node count)
     double *lap_freqs,            // Laplacian frequencies (ni-1, nj-1, nk-1)
     double *node_freqs_out,       // (ni-1, nj-1, nk-1)
-    double cell_sidelength_x = 1,
-    double cell_sidelength_y = 1,
-    double cell_sidelength_z = 1
+    double cell_sidelength_x,
+    double cell_sidelength_y,
+    double cell_sidelength_z
 ) {
     // Indexing
     auto get_idx = [=](int i, int j, int k) { return grid_index_3d(i-1, j-1, k-1, ni-1, nj-1, nk-1); };
@@ -292,13 +294,13 @@ void fd_gauge_correct_3d(
     double *psi_freqs_x,               // (ni, nj-1, nk-1)
     double *psi_freqs_y,               // (ni-1, nj, nk-1)
     double *psi_freqs_z,               // (ni-1, nj-1, nk)
-    double *psi_freqs_x_out = nullptr, // (ni, nj-1, nk-1)
-    double *psi_freqs_y_out = nullptr, // (ni-1, nj, nk-1)
-    double *psi_freqs_z_out = nullptr, // (ni-1, nj-1, nk)
-    double *phi_freqs_out = nullptr,   // (ni-1, nj-1, nk-1)
-    double cell_sidelength_x = 1,
-    double cell_sidelength_y = 1,          
-    double cell_sidelength_z = 1
+    double *psi_freqs_x_out,           // (ni, nj-1, nk-1)
+    double *psi_freqs_y_out,           // (ni-1, nj, nk-1)
+    double *psi_freqs_z_out,           // (ni-1, nj-1, nk)
+    double *phi_freqs_out,             // (ni-1, nj-1, nk-1)
+    double cell_sidelength_x,
+    double cell_sidelength_y,          
+    double cell_sidelength_z
 ) {
     // Indexing
     auto psi_x_idx = [=](int i, int j, int k) { return grid_index_3d(i  , j-1, k-1, ni  , nj-1, nk-1); };
@@ -373,91 +375,113 @@ void fd_gauge_correct_3d(
 //#############################################################################
 
 
-// Works on interior psi values
+// Works on interior edge values
 void to_frequencies_edges_3d(
     int ni, int nj, int nk,
-    double *psi_x,                // (ni, nj-1, nk-1)
-    double *psi_y,                // (ni-1, nj, nk-1)
-    double *psi_z,                // (ni-1, nj-1, nk)
-    double *psi_x_out = nullptr,  // (ni, nj-1, nk-1)
-    double *psi_y_out = nullptr,  // (ni-1, nj, nk-1)
-    double *psi_z_out = nullptr   // (ni-1, nj-1, nk)
+    double *edge_x,                // (ni, nj-1, nk-1)
+    double *edge_y,                // (ni-1, nj, nk-1)
+    double *edge_z,                // (ni-1, nj-1, nk)
+    double *edge_x_out,            // (ni, nj-1, nk-1)
+    double *edge_y_out,            // (ni-1, nj, nk-1)
+    double *edge_z_out             // (ni-1, nj-1, nk)
 ) {
     int fluid_grid_size[3] = {ni, nj, nk};
-    to_frequencies_3d(fluid_grid_size, streamfn_3d_symmetries_x, psi_x, psi_x_out);
-    to_frequencies_3d(fluid_grid_size, streamfn_3d_symmetries_y, psi_y, psi_y_out);
-    to_frequencies_3d(fluid_grid_size, streamfn_3d_symmetries_z, psi_z, psi_z_out);
+    to_frequencies_3d(fluid_grid_size, edges_3d_symmetries_x, edge_x, edge_x_out);
+    to_frequencies_3d(fluid_grid_size, edges_3d_symmetries_y, edge_y, edge_y_out);
+    to_frequencies_3d(fluid_grid_size, edges_3d_symmetries_z, edge_z, edge_z_out);
 }
 
 
-// Works on interior psi values
-void from_frequencies_streamfn_3d(
+// Works on interior edge values
+void from_frequencies_edges_3d(
     int ni, int nj, int nk,
-    double *psi_x,                // (ni, nj-1, nk-1)
-    double *psi_y,                // (ni-1, nj, nk-1)
-    double *psi_z,                // (ni-1, nj-1, nk)
-    double *psi_x_out = nullptr,  // (ni, nj-1, nk-1)
-    double *psi_y_out = nullptr,  // (ni-1, nj, nk-1)
-    double *psi_z_out = nullptr   // (ni-1, nj-1, nk)
+    double *edge_x,                // (ni, nj-1, nk-1)
+    double *edge_y,                // (ni-1, nj, nk-1)
+    double *edge_z,                // (ni-1, nj-1, nk)
+    double *edge_x_out,            // (ni, nj-1, nk-1)
+    double *edge_y_out,            // (ni-1, nj, nk-1)
+    double *edge_z_out             // (ni-1, nj-1, nk)
 ) {
     int fluid_grid_size[3] = {ni, nj, nk};
-    from_frequencies_3d(fluid_grid_size, streamfn_3d_symmetries_x, psi_x, psi_x_out);
-    from_frequencies_3d(fluid_grid_size, streamfn_3d_symmetries_y, psi_y, psi_y_out);
-    from_frequencies_3d(fluid_grid_size, streamfn_3d_symmetries_z, psi_z, psi_z_out);
+    from_frequencies_3d(fluid_grid_size, edges_3d_symmetries_x, edge_x, edge_x_out);
+    from_frequencies_3d(fluid_grid_size, edges_3d_symmetries_y, edge_y, edge_y_out);
+    from_frequencies_3d(fluid_grid_size, edges_3d_symmetries_z, edge_z, edge_z_out);
 }
 
 
-// Works on interior u values
-void to_frequencies_velocity_3d(
+// Works on interior face values
+void to_frequencies_faces_3d(
     int ni, int nj, int nk,
-    double *u_x,                // (ni-1, nj, nk)
-    double *u_y,                // (ni, nj-1, nk)
-    double *u_z,                // (ni, nj, nk-1)
-    double *u_x_out = nullptr,  // (ni-1, nj, nk)
-    double *u_y_out = nullptr,  // (ni, nj-1, nk)
-    double *u_z_out = nullptr   // (ni, nj, nk-1)
+    double *face_x,                // (ni-1, nj, nk)
+    double *face_y,                // (ni, nj-1, nk)
+    double *face_z,                // (ni, nj, nk-1)
+    double *face_x_out,            // (ni-1, nj, nk)
+    double *face_y_out,            // (ni, nj-1, nk)
+    double *face_z_out             // (ni, nj, nk-1)
 ) {
     int fluid_grid_size[3] = {ni, nj, nk};
-    to_frequencies_3d(fluid_grid_size, velocity_3d_symmetries_x, u_x, u_x_out);
-    to_frequencies_3d(fluid_grid_size, velocity_3d_symmetries_y, u_y, u_y_out);
-    to_frequencies_3d(fluid_grid_size, velocity_3d_symmetries_z, u_z, u_z_out);
+    to_frequencies_3d(fluid_grid_size, faces_3d_symmetries_x, face_x, face_x_out);
+    to_frequencies_3d(fluid_grid_size, faces_3d_symmetries_y, face_y, face_y_out);
+    to_frequencies_3d(fluid_grid_size, faces_3d_symmetries_z, face_z, face_z_out);
 }
 
 
-// Works on interior u values
-void from_frequencies_velocity_3d(
+// Works on interior face values
+void from_frequencies_faces_3d(
     int ni, int nj, int nk,
-    double *u_x,                // (ni-1, nj, nk)
-    double *u_y,                // (ni, nj-1, nk)
-    double *u_z,                // (ni, nj, nk-1)
-    double *u_x_out = nullptr,  // (ni-1, nj, nk)
-    double *u_y_out = nullptr,  // (ni, nj-1, nk)
-    double *u_z_out = nullptr   // (ni, nj, nk-1)
+    double *face_x,                // (ni-1, nj, nk)
+    double *face_y,                // (ni, nj-1, nk)
+    double *face_z,                // (ni, nj, nk-1)
+    double *face_x_out,            // (ni-1, nj, nk)
+    double *face_y_out,            // (ni, nj-1, nk)
+    double *face_z_out             // (ni, nj, nk-1)
 ) {
     int fluid_grid_size[3] = {ni, nj, nk};
-    from_frequencies_3d(fluid_grid_size, velocity_3d_symmetries_x, u_x, u_x_out);
-    from_frequencies_3d(fluid_grid_size, velocity_3d_symmetries_y, u_y, u_y_out);
-    from_frequencies_3d(fluid_grid_size, velocity_3d_symmetries_z, u_z, u_z_out);
+    from_frequencies_3d(fluid_grid_size, faces_3d_symmetries_x, face_x, face_x_out);
+    from_frequencies_3d(fluid_grid_size, faces_3d_symmetries_y, face_y, face_y_out);
+    from_frequencies_3d(fluid_grid_size, faces_3d_symmetries_z, face_z, face_z_out);
 }
 
 
-// Works on interior phi values
-void to_frequencies_phi_3d(
+// Works on interior node values
+void to_frequencies_node_3d(
     int ni, int nj, int nk,     // Cell count in each axis (NOT node count)
-    double *phi,                // (ni-1, nj-1, nk-1)
-    double *phi_out = nullptr   // (ni-1, nj-1, nk-1)
+    double *node,               // (ni-1, nj-1, nk-1)
+    double *node_out            // (ni-1, nj-1, nk-1)
 ) {
     int fluid_grid_size[3] = {ni, nj, nk};
-    to_frequencies_3d(fluid_grid_size, phinodes_3d_symmetries, phi, phi_out);
+    to_frequencies_3d(fluid_grid_size, nodes_3d_symmetries, node, node_out);
 }
 
 
-// Works on interior phi values
-void from_frequencies_phi_3d(
+// Works on interior node values
+void from_frequencies_node_3d(
     int ni, int nj, int nk,     // Cell count in each axis (NOT node count)
-    double *phi,                // (ni-1, nj-1, nk-1)
-    double *phi_out = nullptr   // (ni-1, nj-1, nk-1)
+    double *node,                // (ni-1, nj-1, nk-1)
+    double *node_out             // (ni-1, nj-1, nk-1)
 ) {
     int fluid_grid_size[3] = {ni, nj, nk};
-    from_frequencies_3d(fluid_grid_size, phinodes_3d_symmetries, phi, phi_out);
+    from_frequencies_3d(fluid_grid_size, nodes_3d_symmetries, node, node_out);
+}
+
+
+// Works on interior cell values
+void to_frequencies_cells_3d(
+    int ni, int nj, int nk,     // Cell count in each axis (NOT node count)
+    double *cell,               // (ni, nj, nk)
+    double *cell_out = nullptr  // (ni, nj, nk)
+) {
+    int fluid_grid_size[3] = {ni, nj, nk};
+    to_frequencies_3d(fluid_grid_size, cells_3d_symmetries, cell, cell_out);
+}
+
+
+// Works on interior cell values
+void from_frequencies_cells_3d(
+    int ni, int nj, int nk,     // Cell count in each axis (NOT node count)
+    double *cell,                // (ni, nj, nk)
+    double *cell_out = nullptr   // (ni, nj, nk)
+) {
+    int fluid_grid_size[3] = {ni, nj, nk};
+    from_frequencies_3d(fluid_grid_size, cells_3d_symmetries, cell, cell_out);
 }
