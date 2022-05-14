@@ -262,10 +262,66 @@ void fd_node_poisson_solve_3d(
                 };
                 vec3 diff_c2s_ijk = -diff_s2c_ijk;
 
-                // In the DST domain, taking the laplacian of f is just dot(diff, diff) * f
+                // In this frequency domain, taking the laplacian of f is just dot(diff, diff) * f
                 // although we just need to mind which diff multipliers are used. (Sine-to-cosine or the other way around.)
                 // If g is the laplacian of f, then f = g / dot(diff, diff)
                 node_freqs_out[node_idx] = lap_freqs[node_idx] / dot(diff_c2s_ijk, diff_s2c_ijk);
+                                                               // equiv = -mag2(diff)
+            }
+        }
+    }
+}
+
+
+void fd_cell_poisson_solve_3d(
+    int ni, int nj, int nk,       // Cell count in each axis (NOT node count)
+    double *lap_freqs,            // Laplacian frequencies (ni, nj, nk)
+    double *cell_freqs_out,       // (ni, nj, nk)
+    double cell_sidelength_x,
+    double cell_sidelength_y,
+    double cell_sidelength_z
+) {
+    // Indexing
+    auto get_idx = [=](int i, int j, int k) { return grid_index_3d(i, j, k, ni, nj, nk); };
+
+    // Modify input array in-place if no output location is provided.
+    if (!cell_freqs_out) cell_freqs_out = lap_freqs;
+
+    // WARNING: If you modify the following, it has to take into account
+    // that the output location `cell_freqs_out` might be the same as
+    // the input location `lap_freqs`.
+    // That is, do not read after writing.
+
+    // Finite differencing multipliers
+    std::vector<double> diff_s2c_x = fd_finite_differencing_multipliers_s2c(ni, cell_sidelength_x);
+    std::vector<double> diff_s2c_y = fd_finite_differencing_multipliers_s2c(nj, cell_sidelength_y);
+    std::vector<double> diff_s2c_z = fd_finite_differencing_multipliers_s2c(nk, cell_sidelength_z);
+
+    // The for loops here can start at 1 because all axes use DST-I and don't have the 0 frequency.
+    for (int i = 0; i < ni; i++) {
+        for (int j = 0; j < nj; j++) {
+            for (int k = 0; k < nk; k++) {
+                // Special case: The "constant shift" frequency mode can take on any value
+                if (i == 0 && j == 0 && k == 0) {
+                    cell_freqs_out[0] = 0; // set to zero, although any other value is OK as a constant shift that doesn't change the laplacian
+                    continue;
+                }
+
+                int cell_idx = get_idx(i, j, k);
+                assert(cell_idx != INVALID_IDX); // True because the for loop ranges are correct. Assert anyways.
+
+                // TODO: Explain what these diff vectors are
+                vec3 diff_s2c_ijk {
+                    diff_s2c_x[i],
+                    diff_s2c_y[j],
+                    diff_s2c_z[k],
+                };
+                vec3 diff_c2s_ijk = -diff_s2c_ijk;
+
+                // In this frequency domain, taking the laplacian of f is just dot(diff, diff) * f
+                // although we just need to mind which diff multipliers are used. (Sine-to-cosine or the other way around.)
+                // If g is the laplacian of f, then f = g / dot(diff, diff)
+                cell_freqs_out[cell_idx] = lap_freqs[cell_idx] / dot(diff_c2s_ijk, diff_s2c_ijk);
                                                                // equiv = -mag2(diff)
             }
         }

@@ -18,6 +18,16 @@ void fd_node_poisson_solve_3d(
     double cell_sidelength_z = 1
 );
 
+// Works on cell values
+void fd_cell_poisson_solve_3d(
+    int ni, int nj, int nk,       // Cell count in each axis (NOT node count)
+    double *lap_freqs,            // Laplacian frequencies (ni, nj, nk)
+    double *cell_freqs_out,       // (ni, nj, nk)
+    double cell_sidelength_x = 1,
+    double cell_sidelength_y = 1,
+    double cell_sidelength_z = 1
+);
+
 // Not tested yet. Probably better to not use this because
 // it requires more data to have gone through frequency transforms
 // (three grids instead of just the one needed by fd_node_poisson_solve_3d)
