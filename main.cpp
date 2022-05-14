@@ -201,7 +201,6 @@ void test3() {
 
     std::cout << std::endl << "All " << num_repetitions << " repetitions done!" << std::endl;
     std::chrono::duration<double, std::milli> float_ms = end - start;
-    auto int_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout
         << "Total elapsed time: " << float_ms.count() / 1000 << " seconds." << std::endl
         << "That is " << float_ms.count() / 1000 / double(num_repetitions) << " seconds per repetition." << std::endl
