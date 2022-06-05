@@ -148,7 +148,7 @@ void test2() {
 
     std::cout
         << "Please verify that the result laplacian matches the target laplacian." << std::endl
-        << "This laplacian was calculated uses sidelengths "
+        << "This laplacian was calculated using sidelengths "
             << sidelengths[0] << ", " << sidelengths[1] << ", and " << sidelengths[2] << " "
             << "for the x, y, and z axes respectively." << std::endl
         << "Please refer to the test code to verify that the laplacian is calculated as expected." << std::endl
