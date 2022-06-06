@@ -127,7 +127,7 @@ Result laplacian
 
 
 Please verify that the result laplacian matches the target laplacian.
-This laplacian was calculated uses sidelengths 1, 2, and 4 for the x, y, and z axes respectively.
+This laplacian was calculated using sidelengths 1, 2, and 4 for the x, y, and z axes respectively.
 Please refer to the test code to verify that the laplacian is calculated as expected.
 
 
@@ -158,7 +158,112 @@ Task (to be repeated 10 times):
 9 repetitions done
 
 All 10 repetitions done!
-Total elapsed time: 9.21573 seconds.
-That is 0.921573 seconds per repetition.
+Total elapsed time: 9.03763 seconds.
+That is 0.903763 seconds per repetition.
+
+
+################################################################################
+# Test 4: Frequency domain poisson solve with non-zero dirichlet boundary conditions
+################################################################################
+
+Target laplacian (at interior nodes)
+111 112 113 114 115 116 117 
+121 122 123 124 125 126 127 
+131 132 133 134 135 136 137 
+141 142 143 144 145 146 147 
+151 152 153 154 155 156 157 
+
+211 212 213 214 215 216 217 
+221 222 223 224 225 226 227 
+231 232 233 234 235 236 237 
+241 242 243 244 245 246 247 
+251 252 253 254 255 256 257 
+
+311 312 313 314 315 316 317 
+321 322 323 324 325 326 327 
+331 332 333 334 335 336 337 
+341 342 343 344 345 346 347 
+351 352 353 354 355 356 357 
+
+
+Dirichlet boundary condition at low x wall
+411 412 413 414 415 416 417 
+421 422 423 424 425 426 427 
+431 432 433 434 435 436 437 
+441 442 443 444 445 446 447 
+451 452 453 454 455 456 457 
+
+Dirichlet boundary condition at high x wall
+711 712 713 714 715 716 717 
+721 722 723 724 725 726 727 
+731 732 733 734 735 736 737 
+741 742 743 744 745 746 747 
+751 752 753 754 755 756 757 
+
+Dirichlet boundary condition at low y wall
+511 512 513 514 515 516 517 
+521 522 523 524 525 526 527 
+531 532 533 534 535 536 537 
+
+Dirichlet boundary condition at high y wall
+811 812 813 814 815 816 817 
+821 822 823 824 825 826 827 
+831 832 833 834 835 836 837 
+
+Dirichlet boundary condition at low z wall
+611 612 613 614 615 
+621 622 623 624 625 
+631 632 633 634 635 
+
+Dirichlet boundary condition at high z wall
+911 912 913 914 915 
+921 922 923 924 925 
+931 932 933 934 935 
+
+
+Result
+308.713 288.396 286.784 286.547 286.6 289.147 326.488 
+261.965 234.503 231.93 231.372 231.26 234.686 282.158 
+252.69 223.64 220.841 220.219 220.085 223.74 273.29 
+267.817 240.958 238.442 237.888 237.772 241.142 288.011 
+359.718 341.742 340.259 340.029 340.075 342.492 377.494 
+
+260.917 233.195 230.642 230.006 229.78 233.02 282.232 
+194.401 156.693 152.792 151.71 151.257 155.741 219.053 
+178.576 138.593 134.374 133.202 132.718 137.526 203.799 
+196.484 159.529 155.706 154.631 154.172 158.577 221.136 
+314.76 290.083 287.709 287.084 286.847 289.909 336.075 
+
+354.957 335.345 333.753 333.516 333.569 336.096 372.733 
+310.796 284.169 281.62 281.063 280.95 284.352 330.989 
+301.751 273.552 270.778 270.157 270.023 273.653 322.351 
+316.648 290.624 288.132 287.579 287.462 290.807 336.841 
+405.963 388.691 387.228 386.998 387.044 389.442 423.738 
+
+
+Result laplacian
+111 112 113 114 115 116 117 
+121 122 123 124 125 126 127 
+131 132 133 134 135 136 137 
+141 142 143 144 145 146 147 
+151 152 153 154 155 156 157 
+
+211 212 213 214 215 216 217 
+221 222 223 224 225 226 227 
+231 232 233 234 235 236 237 
+241 242 243 244 245 246 247 
+251 252 253 254 255 256 257 
+
+311 312 313 314 315 316 317 
+321 322 323 324 325 326 327 
+331 332 333 334 335 336 337 
+341 342 343 344 345 346 347 
+351 352 353 354 355 356 357 
+
+
+Please verify that the result laplacian matches the target laplacian printed previously.
+This laplacian was calculated using sidelengths 1, 2, and 4 for the x, y, and z axes respectively,
+and uses the printed nonzero Dirichlet boundary values.
+Please refer to the test code to verify that the laplacian is calculated as expected.
 
 
